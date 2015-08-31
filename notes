@@ -19,3 +19,7 @@ $ flask/bin/pip install coverage
 OpenID is now deprecated. Shoudl use other authentication methods (OAuth?)
 
 Should translate WTForm error messages. http://wtforms.simplecodes.com/docs/1.0.1/i18n.html 
+
+Something about database migration and update in lesson 4
+
+
