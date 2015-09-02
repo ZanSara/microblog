@@ -8,6 +8,21 @@ class User(db.Model):
                                                                       # With this relationship we get a user.posts member that gets us the list of posts from the user. 
                                                                       # The backref argument defines a field that will be added to the objects of the "many" class that points back at the "one" object. 
                                                                       # In our case this means that we can use post.author to get the User instance that created a post.
+    def is_authenticated(self): # Check if the user CAN be authenticated
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        try:
+            return unicode(self.id)  # python 2
+        except NameError:
+            return str(self.id)  # python 3    
+    
     def __repr__(self):
         return '<User %r>' % (self.nickname)
 
