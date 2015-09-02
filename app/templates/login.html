@@ -18,16 +18,21 @@ function set_openid(openid, pr)
 <form action="" method="post" name="login">
     {{ form.hidden_tag() }}
     <p>
-        Please enter your OpenID, or select one of the providers below:<br>
-        {{ form.openid(size=80) }}
-        {% for error in form.openid.errors %}  <!-- displays WTF error messages IN ENGLISH: how to translate  http://wtforms.simplecodes.com/docs/1.0.1/i18n.html -->
+        Please enter your username:<br>
+        {{ form.username(size=80) }}<br>
+        Please enter your password:<br>
+        {{ form.password(size=80) }}
+        {% for error in form.errors %}  <!-- displays WTF error messages IN ENGLISH: how to translate  http://wtforms.simplecodes.com/docs/1.0.1/i18n.html -->
           <span style="color: red;">[{{error}}]</span>
         {% endfor %}<br>
-        |{% for pr in providers %}
+        <!--|{% for pr in providers %}
           <a href="javascript:set_openid('{{ pr.url }}', '{{ pr.name }}');">{{ pr.name }}</a> |
-        {% endfor %}
+        {% endfor %} -->
     </p>
     <p>{{ form.remember_me }} Remember Me</p>
     <p><input type="submit" value="Sign In"></p>
 </form>
+
+<a href="{{ url_for('register') }}">Signup</a>
+
 {% endblock %}
