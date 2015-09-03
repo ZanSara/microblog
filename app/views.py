@@ -36,7 +36,14 @@ def index():
 def register():
     if request.method == 'GET':
         return render_template('register.html')
-    user = User(request.form['username'] , request.form['password'],request.form['email'])
+    username = User.unique_username(request.form['username'])
+    if username != request.form['username']:
+        flash('Esiste già un utente con questo nome! Puoi provare {0}'.format(username))
+        return redirect(url_for('register'))
+    if not User.unique_email(request.form['email']):
+        flash("Esiste già un account collegato all'indirizzo {0}.".format(request.form['email']))
+        return redirect(url_for('register'))
+    user = User(username, request.form['password'], request.form['email'])
     db.session.add(user)
     db.session.commit()
     flash('User successfully registered')
@@ -102,7 +109,7 @@ def user(username):
 @app.route('/edit', methods=['GET', 'POST'])
 @login_required
 def edit():
-    form = EditProfileForm()
+    form = EditProfileForm(g.user.username)
     if form.validate_on_submit():
         g.user.username = form.username.data
         g.user.about_me = form.about_me.data
@@ -114,4 +121,18 @@ def edit():
         form.username.data = g.user.username
         form.about_me.data = g.user.about_me
     return render_template('edit.html', form=form)
+    
+    
+    
+    
+    
+# ********** Error Handlers *****************************
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback() # Just in case this 500 was triggered by a database exception
+    return render_template('500.html'), 500
 

@@ -7,7 +7,12 @@
       <table>
           <tr>
               <td>Your nickname:</td>
-              <td>{{ form.username(size=24) }}</td>
+              <td>
+                {{ form.username(size=24) }}
+                {% for error in form.errors.username %}
+                <br><span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+              </td>
           </tr>
           <tr>
               <td>About yourself:</td>

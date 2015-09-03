@@ -17,13 +17,12 @@ class Post(db.Model):
 
 
 
-class User(UserMixin, db.Model):
+class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), nullable=False)
-    password = db.Column('password' , db.String(10))
-    email = db.Column(db.String(64), nullable=True)
-    registered_on = db.Column('registered_on' , db.DateTime)
+    username = db.Column(db.String(64), index=True, unique=True)
+    email = db.Column(db.String(64), index=True, unique=True)
+    password = db.Column(db.String(10), nullable=False)
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime)
     posts = db.relationship('Post', backref='author', lazy='dynamic') # For a one-to-many relationship a db.relationship field is normally defined on the "one" side. 
@@ -34,7 +33,6 @@ class User(UserMixin, db.Model):
         self.username = username
         self.password = password
         self.email = email
-        self.registered_on = datetime.utcnow()
     
     def is_authenticated(self): # Check if the user CAN be authenticated
         return True
@@ -59,6 +57,24 @@ class User(UserMixin, db.Model):
         return 'http://www.gravatar.com/avatar/%s?d=mm&s=%d' % (md5(self.email.encode('utf-8')).hexdigest(), size)
         # d=mm: If one have no Gravatar, return a "mystery man" (mm) image
         # s=%d: return scaled to size.
+    
+    @staticmethod
+    def unique_username(username):
+        if User.query.filter_by(username=username).first() is None:
+            return username
+        version = 1
+        while True:
+            new_username = username + str(version)
+            if User.query.filter_by(username=new_username).first() is None:
+                break
+            version += 1
+        return new_username
+        
+    @staticmethod
+    def unique_email(email):
+        if User.query.filter_by(email=email).first() is None:
+            return True
+        return False
     
 @lm.user_loader
 def load_user(id):
