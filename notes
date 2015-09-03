@@ -16,12 +16,10 @@ $ flask/bin/pip install flipflop
 $ flask/bin/pip install coverage
 
 
-OpenID is now deprecated. Shoudl use other authentication methods (OAuth?)
-
 Should translate WTForm error messages. http://wtforms.simplecodes.com/docs/1.0.1/i18n.html
 Also, flashed messages need to be rendered in the templates, otherwise they're not shown.
 {% with messages = get_flashed_messages() %} ...
 
 Something about database migration and update in lesson 4
 
-
+How to deal with Gravatars: Lesson 6 and documentation (https://en.gravatar.com/site/implement/images)

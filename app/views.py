@@ -4,8 +4,9 @@ from flask import render_template, flash, redirect, session, url_for, request, g
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from flask.ext.sqlalchemy import SQLAlchemy
 from app import app, db, lm
-from .forms import LoginForm
+from .forms import LoginForm, EditProfileForm
 from .models import User
+from datetime import datetime
 
 
 
@@ -47,6 +48,10 @@ def register():
 @app.before_request
 def before_request():
     g.user = current_user
+    if g.user.is_authenticated():
+        g.user.last_seen = datetime.utcnow()
+        db.session.add(g.user)
+        db.session.commit()
             
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -79,12 +84,12 @@ def logout():
     
 # ************ User profile page *****************************
 
-@app.route('/user/<nickname>')
+@app.route('/user/<username>')
 @login_required
-def user(nickname):
-    user = User.query.filter_by(nickname=nickname).first()
+def user(username):
+    user = User.query.filter_by(username=username).first()
     if user == None:
-        flash('User %s not found.' % nickname)
+        flash('User %s not found.' % username)
         return redirect(url_for('index'))
     posts = [
         {'author': user, 'body': 'Test post #1'},
@@ -93,4 +98,20 @@ def user(nickname):
     return render_template('user.html',
                            user=user,
                            posts=posts)
+                           
+@app.route('/edit', methods=['GET', 'POST'])
+@login_required
+def edit():
+    form = EditProfileForm()
+    if form.validate_on_submit():
+        g.user.username = form.username.data
+        g.user.about_me = form.about_me.data
+        db.session.add(g.user)
+        db.session.commit()
+        flash('Your changes have been saved.')
+        return redirect(url_for('edit'))
+    else:
+        form.username.data = g.user.username
+        form.about_me.data = g.user.about_me
+    return render_template('edit.html', form=form)
 

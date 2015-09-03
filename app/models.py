@@ -1,10 +1,9 @@
-from rauth import OAuth1Service, OAuth2Service
 from flask import current_app, url_for, request, redirect, session
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import LoginManager, UserMixin
 from app import lm, db
 from datetime import datetime
- 
+from hashlib import md5 
  
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -25,6 +24,8 @@ class User(UserMixin, db.Model):
     password = db.Column('password' , db.String(10))
     email = db.Column(db.String(64), nullable=True)
     registered_on = db.Column('registered_on' , db.DateTime)
+    about_me = db.Column(db.String(140))
+    last_seen = db.Column(db.DateTime)
     posts = db.relationship('Post', backref='author', lazy='dynamic') # For a one-to-many relationship a db.relationship field is normally defined on the "one" side. 
                                                                       # With this relationship we get a user.posts member that gets us the list of posts from the user. 
                                                                       # The backref argument defines a field that will be added to the objects of the "many" class that points back at the "one" object. 
@@ -44,7 +45,7 @@ class User(UserMixin, db.Model):
     def is_anonymous(self):
         return False
 
-    def get_id(self):
+    def get_id(self): 
         try:
             return str(self.id)  # python 3
         except NameError:
@@ -53,6 +54,11 @@ class User(UserMixin, db.Model):
     
     def __repr__(self):
         return '<User %r>' % (self.nickname)
+    
+    def avatar(self, size):
+        return 'http://www.gravatar.com/avatar/%s?d=mm&s=%d' % (md5(self.email.encode('utf-8')).hexdigest(), size)
+        # d=mm: If one have no Gravatar, return a "mystery man" (mm) image
+        # s=%d: return scaled to size.
     
 @lm.user_loader
 def load_user(id):
