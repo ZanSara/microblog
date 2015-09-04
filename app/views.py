@@ -17,11 +17,11 @@ def index():
     user = g.user
     posts = [
         { 
-            'author': {'nickname': 'John'}, 
+            'author': {'username': 'John'}, 
             'body': 'Beautiful day in Portland!' 
         },
         { 
-            'author': {'nickname': 'Susan'}, 
+            'author': {'username': 'Susan'}, 
             'body': 'The Avengers movie was so cool!' 
         }
     ]
@@ -45,6 +45,7 @@ def register():
         return redirect(url_for('register'))
     user = User(username, request.form['password'], request.form['email'])
     db.session.add(user)
+    db.session.add(user.follow(user)) # Makes every user followers of himself
     db.session.commit()
     flash('User successfully registered')
     return redirect(url_for('login'))
@@ -121,6 +122,51 @@ def edit():
         form.username.data = g.user.username
         form.about_me.data = g.user.about_me
     return render_template('edit.html', form=form)
+    
+    
+# ********** Followers Functions ************************
+
+@app.route('/follow/<username>')
+@login_required
+def follow(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        flash('Utente %s non trovato.' % username)
+        return redirect(url_for('index'))
+    if user == g.user:
+        flash('Ogni utente segue sé stesso di default.')
+        return redirect(url_for('user', username=username))
+    u = g.user.follow(user)
+    if u is None:
+        flash('Non puoi seguire ' + username + '. Forse lo segui già?')
+        return redirect(url_for('user', username=username))
+    db.session.add(u)
+    db.session.commit()
+    flash('Ora segui ' + username + '!')
+    return redirect(url_for('user', username=username))
+
+@app.route('/unfollow/<username>')
+@login_required
+def unfollow(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        flash('Utente %s non trovato.' % username)
+        return redirect(url_for('index'))
+    if user == g.user:
+        flash('Impossibile smettere di seguire sé stessi.')
+        return redirect(url_for('user', username=username))
+    u = g.user.unfollow(user)
+    if u is None:
+        flash('Non puoi smettere di seguire ' + username + '. Riprova più tardi.')
+        return redirect(url_for('user', username=username))
+    db.session.add(u)
+    db.session.commit()
+    flash('Hai smesso di seguire ' + username + '.')
+    return redirect(url_for('user', username=username))
+    
+    
+    
+    
     
     
     
