@@ -23,3 +23,5 @@ Also, flashed messages need to be rendered in the templates, otherwise they're n
 Something about database migration and update in lesson 4
 
 How to deal with Gravatars: Lesson 6 and documentation (https://en.gravatar.com/site/implement/images)
+
+In case the site gets too busy, should move from background threads to background processes to speed up async tasks (lesson 11)

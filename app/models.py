@@ -5,8 +5,8 @@ from app import lm, db
 from datetime import datetime
 from hashlib import md5 
 
-
 class Post(db.Model):
+
     id = db.Column(db.Integer, primary_key = True)
     body = db.Column(db.String(140))
     timestamp = db.Column(db.DateTime)
@@ -113,6 +113,8 @@ class User(db.Model):
                               ).filter(followers.c.follower_id == self.id
                               ).order_by(Post.timestamp.desc()
                               )
+    def sorted_posts(self):
+        return self.posts.order_by(Post.timestamp.desc())
     
 @lm.user_loader
 def load_user(id):

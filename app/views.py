@@ -4,30 +4,29 @@ from flask import render_template, flash, redirect, session, url_for, request, g
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from flask.ext.sqlalchemy import SQLAlchemy
 from app import app, db, lm
-from .forms import LoginForm, EditProfileForm
-from .models import User
+from .forms import LoginForm, EditProfileForm, PostForm
+from .models import User, Post
+from config import POSTS_PER_PAGE
 from datetime import datetime
+from .emails import follower_notification
 
 
-
-@app.route('/')
-@app.route('/index')
+@app.route('/', methods=['GET', 'POST'])
+@app.route('/index', methods=['GET', 'POST'])
+@app.route('/index/<int:page>', methods=['GET', 'POST'])
 @login_required
-def index():
-    user = g.user
-    posts = [
-        { 
-            'author': {'username': 'John'}, 
-            'body': 'Beautiful day in Portland!' 
-        },
-        { 
-            'author': {'username': 'Susan'}, 
-            'body': 'The Avengers movie was so cool!' 
-        }
-    ]
+def index(page=1):
+    form = PostForm()
+    if form.validate_on_submit():
+        post = Post(body=form.post.data, timestamp=datetime.utcnow(), author=g.user)
+        db.session.add(post)
+        db.session.commit()
+        flash('Your post is now live!')
+        return redirect(url_for('index'))  # Without the redirect, the last request is the POST request that submitted the form, so a refresh action will resubmit the form,
+    posts = g.user.followed_posts().paginate(page, POSTS_PER_PAGE, False)
     return render_template('index.html',
                            title='Home',
-                           user=user,
+                           form=form,
                            posts=posts)
                            
 # *************** Register Function *************************************
@@ -93,16 +92,14 @@ def logout():
 # ************ User profile page *****************************
 
 @app.route('/user/<username>')
+@app.route('/user/<username>/<int:page>')
 @login_required
-def user(username):
+def user(username, page=1):
     user = User.query.filter_by(username=username).first()
     if user == None:
         flash('User %s not found.' % username)
         return redirect(url_for('index'))
-    posts = [
-        {'author': user, 'body': 'Test post #1'},
-        {'author': user, 'body': 'Test post #2'}
-    ]
+    posts = user.sorted_posts().paginate(page, POSTS_PER_PAGE, False)
     return render_template('user.html',
                            user=user,
                            posts=posts)
@@ -143,6 +140,7 @@ def follow(username):
     db.session.add(u)
     db.session.commit()
     flash('Ora segui ' + username + '!')
+    follower_notification(user, g.user)
     return redirect(url_for('user', username=username))
 
 @app.route('/unfollow/<username>')
@@ -163,10 +161,6 @@ def unfollow(username):
     db.session.commit()
     flash('Hai smesso di seguire ' + username + '.')
     return redirect(url_for('user', username=username))
-    
-    
-    
-    
     
     
     

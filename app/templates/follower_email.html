@@ -1,0 +1,14 @@
+<p>Dear {{ user.username }},</p>
+<p><a href="{{ url_for('user', username=follower.username, _external=True) }}">{{ follower.username }}</a> is now a follower.</p>
+<table>
+    <tr valign="top">
+        <td><img src="{{ follower.avatar(50) }}"></td>
+        <td>
+            <!-- _external=True : creates a path that is not relative, but global: not "/index", but "http://localhost:5000/index" -->
+            <a href="{{ url_for('user', username=follower.username, _external=True) }}">{{ follower.username }}</a><br />
+            {{ follower.about_me }}
+        </td>
+    </tr>
+</table>
+<p>Regards,</p>
+<p>The <code>microblog</code> admin</p>

@@ -26,3 +26,6 @@ class EditProfileForm(Form):
             self.username.errors.append("{0} è un username già in uso, scegline un'altro.".format(self.username.data))
             return False
         return True
+        
+class PostForm(Form):
+    post = StringField('post', validators=[DataRequired()])

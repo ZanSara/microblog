@@ -17,6 +17,9 @@ lm.init_app(app)
 lm.login_view = 'login'
 lm.login_message = 'Login completato con successo'
 
+from flask.ext.mail import Mail
+mail = Mail(app)
+
 
 # ********************* Debugging tools *********************************
 # Send an email in case of Interna Server Errors
