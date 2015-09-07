@@ -2,4 +2,5 @@
 app/*.pyc
 app.db
 test.db
+app/static
 
