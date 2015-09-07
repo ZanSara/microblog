@@ -4,6 +4,8 @@
     <link href="/static/css/bootstrap-responsive.min.css" rel="stylesheet">
     <script src="http://code.jquery.com/jquery-latest.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/moment.min.js"></script>
+    <script>moment.locale('it');</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
     {% if title %}
@@ -23,7 +25,7 @@
           </a>
           <a class="brand" href="/">microblog</a>
             <ul class="nav">
-              <li><a href="{{ url_for('index') }}">Home</a></li>
+              <li><a href="{{ url_for('index') }}">{{ _Home }}</a></li>  {# {{ _Home }} restituisce il testo tradotto nella lingua scelta #}
               {% if g.user.is_authenticated() %}
               <li><a href="{{ url_for('user', username = g.user.username) }}">Your Profile</a></li>
               <li><a href="{{ url_for('logout') }}">Logout</a></li>

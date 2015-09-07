@@ -3,12 +3,13 @@
 from flask import render_template, flash, redirect, session, url_for, request, g
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.babel import gettext
 from app import app, db, lm
 from .forms import LoginForm, EditProfileForm, PostForm
 from .models import User, Post
-from config import POSTS_PER_PAGE
-from datetime import datetime
+from config import POSTS_PER_PAGE, LANGUAGES
 from .emails import follower_notification
+from datetime import datetime
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -21,7 +22,7 @@ def index(page=1):
         post = Post(body=form.post.data, timestamp=datetime.utcnow(), author=g.user)
         db.session.add(post)
         db.session.commit()
-        flash('Your post is now live!')
+        flash(gettext('Your post is now live!'))
         return redirect(url_for('index'))  # Without the redirect, the last request is the POST request that submitted the form, so a refresh action will resubmit the form,
     posts = g.user.followed_posts().paginate(page, POSTS_PER_PAGE, False)
     return render_template('index.html',
@@ -39,6 +40,10 @@ def register():
     if username != request.form['username']:
         flash('Esiste già un utente con questo nome! Puoi provare {0}'.format(username))
         return redirect(url_for('register'))
+    username = User.make_valid_username(username)
+    if username != request.form['username']:
+        flash('Username non valido: impossibile inserire i caratteri che non siano lettere, numeri, punti e underscore (_).'.format(username))
+        return redirect(url_for('register'))
     if not User.unique_email(request.form['email']):
         flash("Esiste già un account collegato all'indirizzo {0}.".format(request.form['email']))
         return redirect(url_for('register'))
@@ -46,7 +51,7 @@ def register():
     db.session.add(user)
     db.session.add(user.follow(user)) # Makes every user followers of himself
     db.session.commit()
-    flash('User successfully registered')
+    flash('Registrazione completata con successo')
     return redirect(url_for('login'))
 
                            
@@ -162,7 +167,11 @@ def unfollow(username):
     flash('Hai smesso di seguire ' + username + '.')
     return redirect(url_for('user', username=username))
     
-    
+
+# Internationalization and Localization
+#@babel.localeselector
+#def get_locale():
+#    return request.accept_languages.best_match(LANGUAGES.keys())  
     
     
     

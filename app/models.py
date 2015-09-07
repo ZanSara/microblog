@@ -76,6 +76,10 @@ class User(db.Model):
         # s=%d: return scaled to size.
     
     @staticmethod
+    def make_valid_nickname(nickname):
+        return re.sub('[^a-zA-Z0-9_\.]', '', nickname)
+    
+    @staticmethod
     def unique_username(username):
         if User.query.filter_by(username=username).first() is None:
             return username

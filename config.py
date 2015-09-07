@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -23,3 +25,7 @@ ADMINS = ['double.onedoubleninesix@gmail.com']
 POSTS_PER_PAGE = 3
 
 
+LANGUAGES = {
+    'en': 'English',
+    'it': 'Italiano'
+}

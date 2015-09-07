@@ -17,12 +17,17 @@ lm.init_app(app)
 lm.login_view = 'login'
 lm.login_message = 'Login completato con successo'
 
+# This just tells Jinja2 to expose our class as a global variable to all templates.
+from .momentjs import momentjs
+app.jinja_env.globals['momentjs'] = momentjs
+
+
 from flask.ext.mail import Mail
 mail = Mail(app)
 
 
 # ********************* Debugging tools *********************************
-# Send an email in case of Interna Server Errors
+# Send an email in case of Internal Server Errors
 # Remember to set the email server on, when testing:  python -m smtpd -n -c DebuggingServer localhost:25
 from config import basedir, ADMINS, MAIL_SERVER, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD
 

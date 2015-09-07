@@ -21,6 +21,9 @@ class EditProfileForm(Form):
             return False
         if self.username.data == self.original_username:
             return True
+        if self.username.data != User.make_valid_username(self.username.data):
+            self.username.errors.append(gettext("Username non valido. Impossibile utilizzare caratteri che non siano lettere, numeri, il punto e l'underscore (_)"))
+            return False
         user = User.query.filter_by(username=self.username.data).first()
         if user != None:
             self.username.errors.append("{0} è un username già in uso, scegline un'altro.".format(self.username.data))
